@@ -15,9 +15,13 @@
             //error_log (print_r ($_POST, true));
             $searches = $_POST["searches"];
             $userRights = getUserRights ($dbconn, $_SESSION['user_id']);
-			$restrictSearches = ($searches == "MINE") || (!$userRights["canSeeAll"] && !$userRights["isSuperUser"]);
+            $superUser = $userRights["isSuperUser"];
+            // decide if user can only see their own searches
+            $showOthers = $userRights["canSeeAll"] && ($searches !== "MINE");
+            $showFull = $superUser && $showOthers;  // all searches to be shown
             
 			// figure out why epoch from now() isn't working here
+            // Construct first part of query - load search data and 
             $qPart1 = "SELECT id, notes, user_name, submit_date, name, status, random_id, hidden, file_name, seq_name, enzyme, crosslinkers, is_executing, completed, miss_ping from
 
             (select search.id, search.completed, search.is_executing, search.hidden, search.notes, user_name as user_name, search.submit_date AS submit_date, 
@@ -31,15 +35,24 @@
              "
             ;
 
-            // if can_see_all but not a superuser insert this clause
-            $canSeeOthersPublic = "WHERE ((COALESCE (search.private, FALSE) = FALSE AND COALESCE (users.hidden, FALSE) = FALSE) OR search.uploadedby = $1) ";
             
-            $canSeeMineOnly = "WHERE search.uploadedby = $1 ";
-            $canSeeMineOnlyIJ = "WHERE search.uploadedby = $1 ";
-            $innerJoinMine = ($restrictSearches ? $canSeeMineOnlyIJ : "");
+            // Restriction Clauses
             
-            $hideHiddenSearches = " AND COALESCE (search.hidden, FALSE) = FALSE ";
+            // this sub-clause shows all searches apart from others' private searches and from hidden users
+            $canSeeOthersPublicClause = "WHERE ((COALESCE (search.private, FALSE) = FALSE AND COALESCE (users.hidden, FALSE) = FALSE) OR search.uploadedby = $1) ";
+            
+            // whereas these sub-clauses restricts to a user's own searches
+            $canSeeMineOnlyClause = "WHERE search.uploadedby = $1 ";
+            $innerJoinMine = ($showOthers ? "" : "WHERE search.uploadedby = $1 ");
+            
+            // This sub-clause hides hidden searches
+            $hideHiddenSearchesClause = " AND COALESCE (search.hidden, FALSE) = FALSE ";
 
+            // Concatentate these clauses as necessary
+            $privacyClause = $showFull ? "" : (($showOthers ? $canSeeOthersPublicClause : $canSeeMineOnlyClause).($superUser ? "" : $hideHiddenSearchesClause));
+            
+            
+            // Next query part joins and retrieves enzyme and crosslinker names for each search
             $qPart3 = "
             GROUP BY search.id, user_name) srch
 
@@ -63,16 +76,8 @@
             
 			
             $time_start = microtime (true);
-            if (!$userRights["isSuperUser"] || $restrictSearches) {
-                $privateClause = ($restrictSearches ? $canSeeMineOnly : $canSeeOthersPublic).(!$userRights["isSuperUser"] ? $hideHiddenSearches : "");
-                pg_prepare($dbconn, "my_query", $qPart1.$privateClause.$qPart3);
-                $result = pg_execute($dbconn, "my_query", [$_SESSION['user_id']]);
-            } else {
-				//error_log (print_r ("all searches"));
-                //$query = "DECLARE curs1 CURSOR FOR "+$qPart1.$qPart3+";\nOPEN curs1;");
-                pg_prepare($dbconn, "my_query", $qPart1.$qPart3);
-                $result = pg_execute($dbconn, "my_query", []);
-            }
+            pg_prepare($dbconn, "my_query", $qPart1.$privacyClause.$qPart3);
+            $result = pg_execute($dbconn, "my_query", $privacyClause ? [$_SESSION['user_id']] : []);
             $time_end = microtime(true);
             $time = $time_end - $time_start;
 
