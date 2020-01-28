@@ -10,7 +10,7 @@ var CLMSUI = CLMSUI || {};
 CLMSUI.history = {
 
     /**
-     * Make a reachable xi URL from this search id and parameters
+     * Make a reachable xi URL from a search id and parameters
      * @param sid - xi searchID
      * @param params - extra parameters for URL query string such as decoys and lowestScore
      */
@@ -47,7 +47,7 @@ CLMSUI.history = {
     tempValues: {},	// store user values temporarily, in case they decide to 'keep' later on
 
     /**
-     * Get initial values by merging defaults with values in localStorage
+     * Get initial values by merging defaults with values fetched from localStorage
      */
     getInitialValues: function () {
         var cookieValues = this.getCookieValue() || {};
@@ -61,6 +61,9 @@ CLMSUI.history = {
         return $.extend ({}, this.defaultValues, {searchScope: currentRadio.size() === 1 ? currentRadio.attr("id") : undefined}, cookieValues);
     },
 
+    /**
+    * Initialise search scope choice controls
+    */
     init: function () {
         var self = this;
         d3.select("#scopeOptions").selectAll("input[type='radio']")
@@ -81,6 +84,9 @@ CLMSUI.history = {
     },
 
 
+    /**
+    *   Load the search list from the database with an ajax call to php
+    */
     loadSearchList: function () {
          var initialValues = this.getInitialValues();	// get default / cookie values
 
@@ -89,6 +95,7 @@ CLMSUI.history = {
 
         var self = this;
 
+        // Column settings for d3table
         var columnSettings = {
             name: {columnName: "Visualise Search", type: "alpha", headerTooltip: "", visible: true, removable: true},
             fdr: {columnName: "+FDR", type: "none", headerTooltip: "Visualise search with decoys to allow False Discovery Rate calculations", visible: true, removable: true},
@@ -121,8 +128,9 @@ CLMSUI.history = {
         var userOnly = initialValues.searchScope === "mySearches";
         var params = userOnly ? "searches=MINE" : "searches=ALL";
 
+        // Set up and launch loading spinner
         if (d3.select(".container #clmsErrorBox").empty()) {
-            var statusBox = d3.select(".container")
+            d3.select(".container")
                 .append("div")
                 .attr ("id", "clmsErrorBox")
                     .append("div")
@@ -138,23 +146,8 @@ CLMSUI.history = {
 
 
         var t1 = performance.now();
-        /*
-        console.log ("START OBOE", t1);
-        oboe('./php/searches.php?'+params)
-            .done (function (response) {
-                var t2 = performance.now();
-                console.log ("STOP OBOE +", t2-t1, "I/O", ((t2-t1)/1000) - response.time);
-                console.log ("things", response);
-                t1 = performance.now();
-                console.log ("START AJAX", t1);
-            })
-            .fail (function () {
-
-            })
-        ;
-        */
-
-
+    
+        // Load data from searches.php
        $.ajax({
             type:"POST",
             url:"./php/searches.php",
@@ -197,21 +190,49 @@ CLMSUI.history = {
                             return response.userRights && response.userRights[type];
                         };
 
+                        // Add further menu buttons depending on user rights (called php always checks so secure)
                         d3.select("#username").text(response.user);
                         d3.selectAll("#newSearch").style("display", userHasRights ("canAddNewSearch") ? null : "none");
                         d3.selectAll("#userGUI,#logout").style("display", userHasRights ("doesUserGUIExist") ? null : "none");
                         d3.selectAll("#scopeOptions").style("display", userHasRights ("canSeeAll") ? null : "none");
 
-
+                        /**
+                        *   Make a hyperlink HTML string for a given search and parameters
+                        *   @function makeResultsLink
+                        *   @inner
+                        *   @memberof CLMSUI.history
+                        *   @param sid - search id
+                        *   @param params - additional url query parameters
+                        *   @param label - text label for hyperlink element
+                        *   @returns {string} HTML snippet
+                        */
                         var makeResultsLink = function (sid, params, label) {
                              return "<a href='"+CLMSUI.history.makeResultsUrl(sid, params)+"'>"+label+"</a>";
                         };
 
+                        /**
+                        *   Make a validation URL for a given search and paramters
+                        *   @function makeValidationURL
+                        *   @inner
+                        *   @memberof CLMSUI.history
+                        *   @param sid - search id
+                        *   @param params - additional url query parameters
+                        *   @returns {string} Validation URL as string
+                        */
                         var makeValidationUrl = function (sid, params) {
                              return "../xi3/validate.php?sid="+sid+params;
                         };
 
-                        var makeBaseNewLink = function (d, params, label) {
+                        /**
+                        *   Make a hyperlink HTML string for the search submit page based on a search id
+                        *   @function makeBaseNewLink
+                        *   @inner
+                        *   @memberof CLMSUI.history
+                        *   @param d - Object (d3 data element). id and random_id properties hold the relevant search data
+                        *   @param label - text label for hyperlink element
+                        *   @returns {string} HTML snippet
+                        */
+                        var makeBaseNewLink = function (d, label) {
                              return "<a href='../../searchSubmit/submitSearch.html?base="+d.id+"-"+d.random_id+"'>"+label+"</a>";
                         };
 
@@ -222,6 +243,7 @@ CLMSUI.history = {
                         var tooltipHelper = function (d, field) {
                             return d.value.id + ": " + d.value[field];
                         }
+                        // tooltips for columns
                         var tooltips = {
                             notes: function(d) { return tooltipHelper (d, "notes"); },
                             name: function(d) { return tooltipHelper (d, "status"); },
@@ -231,6 +253,7 @@ CLMSUI.history = {
                             crosslinkers: function(d) { return tooltipHelper (d, "crosslinkers"); },
                         };
 
+                        // cell stylings for columns
                         var cellStyles = {
                             name: "varWidthCell",
                             file_name: "varWidthCell2",
@@ -261,6 +284,9 @@ CLMSUI.history = {
                             return (msg.substr(0,4) === "XiDB" || msg.substr(0,10) === "UNFINISHED");
                         };
 
+                        // These modifiers are used by d3table to change the output from simple text fields
+                        // i.e. to make hyperlinks and buttons and add extra information
+                        // 'd' holds the data for an entire row (across all columns)
                         var modifiers = {
                             name: function(d) {
                                 var completed = d.status === "completed";
@@ -294,7 +320,7 @@ CLMSUI.history = {
                             enzyme: function (d) { return d.enzyme; },
                             crosslinkers: function (d) { return d.crosslinkers; },
                             base_new: function (d) {
-                                return makeBaseNewLink (d, null, "Base New");
+                                return makeBaseNewLink (d, "Base New");
                             },
                             submit_date: function(d) {
                                 return d.submit_date.substring(0, d.submit_date.indexOf("."));
@@ -310,6 +336,7 @@ CLMSUI.history = {
                             }
                         };
 
+                        // Make a columnSettings object for d3table using the above info
                         var propertyNames = ["cellStyle", "dataToHTMLModifier", "tooltip"];
                         [cellStyles, modifiers, tooltips].forEach (function (obj, i) {
                             var propName = propertyNames[i];
@@ -327,7 +354,13 @@ CLMSUI.history = {
                         //console.log ("rights", response.userRights);
                         //console.log ("data", response.data);
 
-                        // Sanitise, get rid of html, comment characters that could be exploited
+                        /**
+                        *   Sanitise data in place, get rid of html, comment characters that could be exploited
+                        *   @function sanitise
+                        *   @inner
+                        *   @memberof CLMSUI.history
+                        *   @param data - all returned search data from ajax
+                        */
                         var sanitise = function (data) {
                             var escapeHtml = function (html) {
                                 var fn = function(tag) {
@@ -358,6 +391,7 @@ CLMSUI.history = {
                             }
                         };
 
+                        // Show a search's sequence name in the file name string if different from raw file name
                         var preformatData = function (data) {
                             if (data.length) {
                                 data.forEach (function (d) {
@@ -417,7 +451,15 @@ CLMSUI.history = {
                             );
                         };
 
-                        // button to clear aggregation checkboxes
+                        /**
+                        *   Add button to clear aggregation checkboxes which calls history.clearAggregationInputs
+                        *   @function addClearAggInputsButton
+                        *   @inner
+                        *   @memberof CLMSUI.history
+                        *   @param buttonContainer - parent container for this button
+                        *   @param d3RowFunc - function that gives access to every row in d3table
+                        *   @param data - underlying d3table data
+                        */
                         function addClearAggInputsButton (buttonContainer, d3rowFunc, data) {
                             buttonContainer
                                 .append("button")
@@ -425,20 +467,35 @@ CLMSUI.history = {
                                 .attr ("class", "btn btn-1 btn-1a clearChx")
                                 .attr ("title", "Clear all aggregation group values")
                                 .on ("click", function () {
-                                    CLMSUI.history.clearAggregationInputs (d3rowFunc(), data);
+                                    CLMSUI.history.clearAggregationInputs (data, d3rowFunc());
                                 })
                             ;
                         }
 
-                        // cookie store if allowed
-                        function storeColumnHiding (value, checked) {
+                        /**
+                        *   Store column hiding settings in localStorage if permitted
+                        *   @function storeColumnHiding
+                        *   @inner
+                        *   @memberof CLMSUI.history
+                        *   @param column - column name to hide or show
+                        *   @param checked - true (show) or false (hide)
+                        */
+                        function storeColumnHiding (column, checked) {
                             var visibilities = self.getCookieValue("visibility");
                             if (visibilities) {
-                                visibilities[value] = checked;
+                                visibilities[column] = checked;
                                 self.updateCookie ("visibility", visibilities);
                             }
                         }
 
+                        /**
+                        *   Store current column ordering in localStorage if permitted
+                        *   @function storeOrdering
+                        *   @inner
+                        *   @memberof CLMSUI.history
+                        *   @param sortColumn - name of column to sort on
+                        *   @param sortDesc - sort is ascending (false) or descending (true)
+                        */
                         function storeOrdering (sortColumn, sortDesc) {
                             var sort = self.getCookieValue("sort");
                             if (sort) {
@@ -448,12 +505,18 @@ CLMSUI.history = {
                             }
                         }
 
+                        /**
+                        *   Store current column filters in localStorage if permitted
+                        *   @function storeFiltering
+                        *   @inner
+                        *   @memberof CLMSUI.history
+                        *   @param filterVals - column indexed array of objects with filter as value property in each
+                        */
                         function storeFiltering (filterVals) {
                             var filters = self.getCookieValue("filters");
                             if (filters) {
-                                var dfilters = filterVals;
                                 var fobj = {};
-                                dfilters.forEach (function (df, i) {
+                                filterVals.forEach (function (df, i) {
                                     if (df !== "none" && df.value) {
                                         fobj[i] = df.value;
                                     }
@@ -463,7 +526,15 @@ CLMSUI.history = {
                         }
 
 
-                        // Add a multiple select widget for column visibility
+                        /**
+                        *   Add a multiple select widget (multiple-select.js) for column visibility
+                        *   @function addColumnSelector
+                        *   @inner
+                        *   @memberof CLMSUI.history
+                        *   @param containerSelector - parent element as a d3 selection
+                        *   @param d3table - d3table instance
+                        *   @param dispatch - d3 event dispatch object
+                        */
                         function addColumnSelector (containerSelector, d3table, dispatch) {
                             var newtd = containerSelector;
                             newtd.append("span").text("Show Columns");
@@ -497,13 +568,29 @@ CLMSUI.history = {
                             newtd.append("span").attr("class", "dividerSection");
                         }
 
+                        /**
+                        *   Add a span to hold the number of current searches in the table
+                        *   @function addFilterReporter
+                        *   @inner
+                        *   @memberof CLMSUI.history
+                        *   @param containerSelector - parent element as a d3 selection
+                        *   @param d3table - d3table instance
+                        */
                         function addFilterReporter (containerSelector, d3table) {
                             var freporter = containerSelector.append("span")
                                 .attr("class", "filterReporter dividerSection")
                                 .attr ("title", "Number of searches that satisfy table filters")
                             ;
                         }
-
+                        
+                        /**
+                        *   Add a span to cancel the current column sort on the d3table
+                        *   @function addCancelSort
+                        *   @inner
+                        *   @memberof CLMSUI.history
+                        *   @param containerSelector - parent element as a d3 selection
+                        *   @param d3table - d3table instance
+                        */
                         function addCancelSort (containerSelector, d3table) {
                             var sortCanceller = containerSelector.append("button")
                                 .attr ("class", "btn btn-1 btn-1a darkBackground")
@@ -522,6 +609,13 @@ CLMSUI.history = {
                         }
 
 
+                        /**
+                        *   Apply cell styling to d3table headers
+                        *   @function applyHeaderStyling
+                        *   @inner
+                        *   @memberof CLMSUI.history
+                        *   @param headers - d3 selection of d3 table header cells
+                        */
                         function applyHeaderStyling (headers) {
                             var title = headers.select("svg").select("title");
                             if (title.empty()) {
@@ -550,16 +644,28 @@ CLMSUI.history = {
                         }
 
 
-                        // hidden row state can change when restore/delete pressed or when restart pressed
+                        /**
+                        *   Update visual row state according to hidden property of underlying data object.
+                        *   Resets hide button text and row appearance.
+                        *   @function updateHiddenRowStates
+                        *   @inner
+                        *   @memberof CLMSUI.history
+                        *   @param selectedRows - d3 selection of table (tr) rows
+                        */
                         function updateHiddenRowStates (selectedRows) {
-                            // reset button text and row appearance
                             selectedRows.selectAll(".deleteButton").text (function(d) {
                                 return isTruthy(d.hidden) ? "Restore" : "Delete";
                             });
                             selectedRows.classed ("hiddenSearch", function(d) { return isTruthy(d.hidden); });
                         }
 
-                        // Add functionality to buttons / links in table
+                        /**
+                        *   Add delete search functionality to buttons / links in table
+                        *   @function addDeleteButtonFunctionality
+                        *   @inner
+                        *   @memberof CLMSUI.history
+                        *   @param selection - d3 selection of a table row (tr)
+                        */
                         var addDeleteButtonFunctionality = function (selection) {
                             selection.select("button.deleteButton")
                                 .classed("btn btn-1 btn-1a", true)
@@ -619,6 +725,13 @@ CLMSUI.history = {
                         };
 
 
+                        /**
+                        *   Add restart search functionality to buttons / links in table
+                        *   @function addRestartButtonFunctionality
+                        *   @inner
+                        *   @memberof CLMSUI.history
+                        *   @param selection - d3 selection of a table row (tr)
+                        */
                         var addRestartButtonFunctionality = function (selection) {
                             selection.select("button.restartButton")
                                 .classed("btn btn-1 btn-1a", true)
@@ -673,7 +786,14 @@ CLMSUI.history = {
                             ;
                         };
 
-
+                        /**
+                        *   Add search validation functionality to buttons / links in table. This makes a pop-up
+                        *   listing links to different validation types.
+                        *   @function addValidationFunctionality
+                        *   @inner
+                        *   @memberof CLMSUI.history
+                        *   @param selection - d3 selection of a table row (tr)
+                        */
                         var addValidationFunctionality = function (selection) {
                             var lowScore = "&lowestScore=2";
                             selection.select(".validateButton")
@@ -692,6 +812,13 @@ CLMSUI.history = {
                         };
 
 
+                        /**
+                        *   Add aggregation setting functionality to input fields in table.
+                        *   @function addAggregateFunctionality
+                        *   @inner
+                        *   @memberof CLMSUI.history
+                        *   @param selection - d3 selection of a table row (tr)
+                        */
                         var addAggregateFunctionality = function (selection) {
                             selection.select(".aggregateInput")
                                 .on ("input", function(d) {
@@ -709,6 +836,13 @@ CLMSUI.history = {
                         };
 
 
+                        /**
+                        *   Adds all the previous functionalities to a table row
+                        *   @function empowerRows
+                        *   @inner
+                        *   @memberof CLMSUI.history
+                        *   @param selection - d3 selection of a table row (tr)
+                        */
                         var empowerRows = function (rowSelection) {
                             addDeleteButtonFunctionality (rowSelection);
                             addRestartButtonFunctionality (rowSelection);
@@ -719,6 +853,7 @@ CLMSUI.history = {
                         };
 
 
+                        // Make the d3 table - data, column settings and ordering
                         var d3tableElem = d3.select(".container").append("div")
                             .datum({
                                 data: response.data || [],
@@ -728,16 +863,19 @@ CLMSUI.history = {
                         ;
                         var d3table = CLMSUI.d3Table ();
                         d3table (d3tableElem);
+                        
+                        // Apply header styling to generated d3 table
                         applyHeaderStyling (d3table.getHeaderCells());
                         console.log ("d3table", d3table);
 
-                        // set initial filters
+                        // extract initial filters
                         var keyedFilters = {};
                         d3.keys(columnSettings).forEach (function (columnKey) {
                             var findex = d3table.getColumnIndex (columnKey);
                             keyedFilters[columnKey] = initialValues.filters[findex];
                         });
 
+                        // set initial filters and add empowerRows as function to run after table update (makes functionality available)
                         d3table
                             .filter(keyedFilters)
                             .postUpdate (empowerRows)
@@ -760,6 +898,8 @@ CLMSUI.history = {
                             var str = comma(d3table.getFilteredSize()) + (anyFilterValueSet ? " of " + comma(d3table.getData().length) : "") + " Searches";
                             d3.selectAll(".filterReporter").text(str);
                         };
+                        
+                        // Make dispatch object and attach events
                         var dispatch = d3table.dispatch();
                         dispatch.on ("columnHiding", storeColumnHiding);
                         dispatch.on ("filtering.store", storeFiltering);  // add two functions to filtering events by distinguishing with .
@@ -775,7 +915,7 @@ CLMSUI.history = {
                         // add button to cancel table sort
                         addCancelSort (d3tableElem.select("div.d3tableControls"), d3table);
 
-                        // hide delete filter if not superuser as pointless
+                        // hide delete column filter if not superuser as pointless
                         d3table.showFilterCell ("hidden", response.userRights.isSuperUser);
 
                         // allows css trick to highlight filter inputs with content so more visible to user
@@ -811,7 +951,12 @@ CLMSUI.history = {
            }
        });
     },
-
+    
+    /**
+    *   Launch an aggregated search in a new window/tab
+    *   @param tableData - underlying table data - holds aggregation setting for each row
+    *   @param fdrCapable - boolean - if true adds params to query string that permits fdr calculations
+    */
     aggregate: function (tableData, fdrCapable) {
         var values = tableData
             .filter (function (d) {
@@ -834,12 +979,22 @@ CLMSUI.history = {
         }
     },
 
-    clearAggregationInputs: function (d3TableRows, data) {
+    /**
+    *   Clear the underlying table data aggregation settings and visible table inputs
+    *   @param tableData - underlying table data - holds aggregation setting for each row
+    *   @param d3TableRows - d3 selection of table rows
+    */
+    clearAggregationInputs: function (tableData, d3TableRows) {
         d3TableRows.selectAll(".aggregateInput").property("value", "");
-        data.forEach (function (d) { d.aggregate = ""; });
-        CLMSUI.history.anyAggGroupsDefined (data, false);
+        tableData.forEach (function (d) { d.aggregate = ""; });
+        CLMSUI.history.anyAggGroupsDefined (tableData, false);
     },
 
+    /**
+    *   Ascertain if any aggregation selections have been made and set aggregation report fields accordingly
+    *   @param tableData - underlying table data - holds aggregation setting for each row
+    *   @param anySelected - set true/false if we know aggregation selections have been made, leave undefined otherwise
+    */
     anyAggGroupsDefined: function (tableData, anySelected) {
         if (anySelected === undefined || anySelected === true) {
             var sel = tableData.filter (function(d) { return d.aggregate; });
@@ -854,6 +1009,9 @@ CLMSUI.history = {
         ;
     },
 
+    /**
+    *   Anonymise table for screenshot purposes
+    */
     anonForScreenshot: function () {
         // Anon usernames, search names, current user. Remember to filter to completed searches only.
         d3.selectAll("tbody").selectAll("td:nth-child(12)").text(function() { return ["bert", "bob", "allan", "audrey", "fiona"][Math.floor(Math.random() * 5)]; });
@@ -863,6 +1021,10 @@ CLMSUI.history = {
         d3.select("#username").text("A Xi User");
     },
 
+    /**
+    *   Add horizontally aligned plus minus buttons for page navigation
+    *   @param d3table - d3table object
+    */
     addPlusMinusTableButtons: function (d3table) {
         d3table.getSelection()
             .selectAll(".d3table-pageInput .d3table-pageWidget")
@@ -882,28 +1044,12 @@ CLMSUI.history = {
         ;
     },
 
-    /*
-    getCookieValue: function (field) {
-        if (this.cookieContext.Cookies !== undefined) {
-            var xiCookie = this.cookieContext.Cookies.getJSON("xiHistory");
-            if (xiCookie) {
-                return field ? xiCookie[field] : xiCookie;
-            }
-        }
-        return undefined;
-    },
-
-    updateCookie: function (field, value) {
-        if (this.cookieContext.Cookies !== undefined) {
-            var xiCookie = this.cookieContext.Cookies.getJSON("xiHistory");
-            if (xiCookie) {
-                xiCookie[field] = value;
-                this.cookieContext.Cookies.set("xiHistory", xiCookie);
-            }
-        }
-    },
+    /**
+    *   Misnamed really, gets value from localStorage for a given field. If no localstorage, gets value from non-persistent variable
+    *   @param field - property to retrieve
+    *   @param force - get value regardless of current permission
+    *   @returns field value
     */
-
     getCookieValue: function (field, force) {
         if (force || this.youMayRememberMe()) {
             var xiCookie = localStorage.getItem ("xiHistory");
@@ -916,6 +1062,12 @@ CLMSUI.history = {
         return this.tempValues[field];
     },
 
+    /**
+    *   Misnamed really, sets value in localStorage for a given field. If no localstorage, sets value in non-persistent variable
+    *   @param field - property to store
+    *   @param value - value to set for property
+    *   @param force - set value regardless of current permission
+    */
     updateCookie: function (field, value, force) {
         if (force || this.youMayRememberMe()) {
             var xiCookie = localStorage.getItem("xiHistory");
@@ -931,28 +1083,10 @@ CLMSUI.history = {
         this.tempValues[field] = value;	// store values temporarily in case the user decides to press 'keep' later on
     },
 
-    /*
-    askCookiePermission: function (context) {
-        this.cookieContext = context;
-        var self = this;
-
-        if (this.cookieContext.Cookies !== undefined && this.cookieContext.Cookies.get("xiHistory") === undefined) {
-            CLMSUI.jqdialogs.areYouSureDialog (
-                "popChoiceDialog",
-                "Can we use cookies to track your preferences on this page?",
-                "Cookies", "Yes", "No",
-                function () {
-                    self.cookieContext.Cookies.set("xiHistory",
-                        self.defaultValues,
-                        { expires : 365 }
-                    );
-                }
-            );
-        }
-    },
+    /**
+    *   Is local storage avaiable?
+    *   @returns - true if local storage available
     */
-
-    // is local storage viable?
     canLocalStorage: function () {
         try {
             localStorage.setItem ('mod', 'mod');
@@ -963,7 +1097,10 @@ CLMSUI.history = {
         }
     },
 
-
+    /**
+    *   Can we store user preferences?
+    *   @returns - true if we can store user preferences
+    */
     youMayRememberMe: function () {
         if (this.canLocalStorage()) {
             return this.getCookieValue ("rememberMe", true) || false;
@@ -971,7 +1108,10 @@ CLMSUI.history = {
         return false;
     },
 
-
+    /**
+    *   Set whether we can store user preferences
+    *   @param event - DOM event on a checkbox; event.target.checked is the needed value
+    */
     setRemember: function (event) {
         if (this.canLocalStorage()) {
             this.updateCookie ("rememberMe", event.target.checked ? true : false, true);
