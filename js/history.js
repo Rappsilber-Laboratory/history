@@ -1,6 +1,6 @@
 /*jslint browser: true, white: true, stupid: true, vars: true*/
 var CLMSUI = CLMSUI || {};
-  
+
 /**
  * Javascript code for constructing a paged table of xi search results
  * from a returned database query.
@@ -18,7 +18,7 @@ CLMSUI.history = {
         return "../xi3/network.php?sid="+sid+params;
     },
 
-    
+
     defaultValues: {
         visibility: {
             "Visualise Search": true,
@@ -146,7 +146,7 @@ CLMSUI.history = {
 
 
         var t1 = performance.now();
-    
+
         // Load data from searches.php
        $.ajax({
             type:"POST",
@@ -233,7 +233,7 @@ CLMSUI.history = {
                         *   @returns {string} HTML snippet
                         */
                         var makeBaseNewLink = function (d, label) {
-                             return "<a href='../../searchSubmit/submitSearch.html?base="+d.id+"-"+d.random_id+"'>"+label+"</a>";
+                             return "<a href='../searchSubmit/submitSearch.html?base="+d.id+"-"+d.random_id+"'>"+label+"</a>";
                         };
 
                         var isTruthy = function (val) {
@@ -582,7 +582,7 @@ CLMSUI.history = {
                                 .attr ("title", "Number of searches that satisfy table filters")
                             ;
                         }
-                        
+
                         /**
                         *   Add a span to cancel the current column sort on the d3table
                         *   @function addCancelSort
@@ -863,7 +863,7 @@ CLMSUI.history = {
                         ;
                         var d3table = CLMSUI.d3Table ();
                         d3table (d3tableElem);
-                        
+
                         // Apply header styling to generated d3 table
                         applyHeaderStyling (d3table.getHeaderCells());
                         console.log ("d3table", d3table);
@@ -898,7 +898,7 @@ CLMSUI.history = {
                             var str = comma(d3table.getFilteredSize()) + (anyFilterValueSet ? " of " + comma(d3table.getData().length) : "") + " Searches";
                             d3.selectAll(".filterReporter").text(str);
                         };
-                        
+
                         // Make dispatch object and attach events
                         var dispatch = d3table.dispatch();
                         dispatch.on ("columnHiding", storeColumnHiding);
@@ -951,7 +951,7 @@ CLMSUI.history = {
            }
        });
     },
-    
+
     /**
     *   Launch an aggregated search in a new window/tab
     *   @param tableData - underlying table data - holds aggregation setting for each row
