@@ -305,7 +305,7 @@ CLMSUI.history = {
                             restart: function(d) {
                                 // add restart button for user if search executing, not completed and hasn't pinged in a while
                                 // let user use judgement
-                                return (d.user_name === response.user || response.userRights.isSuperUser) && (/*isTruthy(d.is_executing) &&*/ !isTruthy(d.completed) && isTruthy(d.miss_ping)) ? "<button class='restartButton unpadButton'>Restart</button>" : "";
+                                return (d.user_name === response.user || response.userRights.isSuperUser) && (/*isTruthy(d.is_executing) &&*/ !isTruthy(d.completed) && isTruthy(d.miss_ping) && d.status !='queuing') ? "<button class='restartButton unpadButton'>Restart</button>" : "";
                             },
                             notes: function (d) {
                                 // Let fixed column width take care of only showing the first few characters
