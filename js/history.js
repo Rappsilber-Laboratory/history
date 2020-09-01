@@ -22,13 +22,14 @@ CLMSUI.history = {
     defaultValues: {
         visibility: {
             "Visualise Search": true,
+            "AutoValidated": true,
             "+FDR": true,
             "Restart": false,
             "Notes": true,
             "Validate": true,
             "Sequence": true,
             "Enzyme": false,
-            "Cross-Linkers": false,
+            "Crosslinkers": false,
             "Submit Date": true,
             "ID": true,
             "Base New": false,
@@ -98,13 +99,14 @@ CLMSUI.history = {
         // Column settings for d3table
         var columnSettings = {
             name: {columnName: "Visualise Search", type: "alpha", headerTooltip: "", visible: true, removable: true},
-            fdr: {columnName: "+FDR", type: "none", headerTooltip: "Visualise search with decoys to allow False Discovery Rate calculations", visible: true, removable: true},
+            auto: {columnName: "AutoValidated", type: "none", headerTooltip: "Visualise autovalidated matches", visible: true, removable: true},
+            fdr: {columnName: "+FDR", type: "none", headerTooltip: "Visualise search with simple link level False Discovery Rate calculations in browser", visible: true, removable: true},
             restart: {columnName: "Restart", type: "none", headerTooltip: "", visible: false, removable: true},
             notes: {columnName: "Notes", type: "alpha", headerTooltip: "", visible: true, removable: true},
             validate: {columnName: "Validate", type: "none", headerTooltip: "", visible: true, removable: true},
             file_name: {columnName: "Sequence", type: "alpha", headerTooltip: "", visible: true, removable: true},
             enzyme: {columnName: "Enzyme", type: "alpha", headerTooltip: "", visible: false, removable: true},
-            crosslinkers: {columnName: "Cross-Linkers", type: "alpha", headerTooltip: "", visible: false, removable: true},
+            crosslinkers: {columnName: "Crosslinkers", type: "alpha", headerTooltip: "", visible: false, removable: true},
             base_new: {columnName: "Base New", type: "none", headerTooltip: "Base a New Search's parameters on this Search", visible: false, removable: true},
             submit_date: {columnName: "Submit Date", type: "alpha", headerTooltip: "", visible: true, removable: true},
             id: {columnName: "ID", type: "alpha", headerTooltip: "", visible: true, removable: true},
@@ -266,6 +268,7 @@ CLMSUI.history = {
                         var cellWidths = {
                             //name: "20em",
                             notes: "8em",
+                            auto: "3.5em",
                             fdr: "3.5em",
                             restart: "5em",
                             validate: "5em",
@@ -297,6 +300,10 @@ CLMSUI.history = {
                                 var error = !completed && isErrorMsg (d.status);
                                 return nameHtml + (error ? "<span class='xierror'>" : "") + " ["+d.status.substring(0,16)+"]" + (error ? "</span>" : "") /*+
                                     (d.status.length <= 16 ? "" : "<div style='display:none'>"+d.status+"</div>")*/;
+                            },
+                            auto: function (d) {
+                                var unuseable = isErrorMsg (d.status) || d.status !== "completed";
+                                return unuseable ? "" : makeResultsLink (d.id+"-"+d.random_id, "&auto=1", "AutoValidated");
                             },
                             fdr: function (d) {
                                 var unuseable = isErrorMsg (d.status) || d.status !== "completed";
