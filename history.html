@@ -3,44 +3,51 @@
 
 <head>
     <title>History Page</title>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <meta name="description" content="common platform for downstream analysis of CLMS data" />
-    <meta name="keywords" content="biologists, mass-spectrometrists, cross-linking, protein, complexes, 3d, models, rappsilber, software" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="xiVIEW is a tool for visualizing crosslinking / mass spectrometry data."/>
+    <meta name="keywords"
+          content="xiVIEW, xiNET, xiSPEC, biologists, mass-spectrometry, crosslinking, cross-linking, CLMS, XLMS, protein, interaction, fragmentation, MS2, rappsilber, software"/>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
-    <link rel="stylesheet" href="../vendor/css/reset.css" />
-    <link rel="stylesheet" href="../vendor/css/common.css" />
-    <link rel="stylesheet" href="./css/history.css" />
-    <link rel="stylesheet" href="../vendor/css/d3table.css" />
-    <link rel="stylesheet" href="../vendor/css/jquery-ui.css" />
-    <link rel="stylesheet" href="../vendor/css/multiple-select.css" />
+<!--    <link type="text/css" rel="Stylesheet" href="css/font-awesome.min.css">-->
+<!--    <link rel="icon" type="image/png" href="./images/logos/favicon-32x32.png" sizes="32x32"/>-->
+<!--    <link rel="icon" type="image/png" href="./images/logos/favicon-16x16.png" sizes="16x16"/>-->
+<!--    <link rel="stylesheet" href="./css/reset.css"/>-->
+<!--    <link rel="stylesheet" href="./css/noscript.css"/>-->
+<!--    <link rel="stylesheet" href="./css/style.css"/>-->
+<!--    //was out <link rel="stylesheet" href="./css/responsive.css"/>-->
+<!--    <link rel="stylesheet" href="./css/common.css"/>-->
+<!--    <link rel="stylesheet" href="./css/login.css"/>-->
 
-    <script type="text/javascript" src="../vendor/js/d3.js"></script>
-    <script type="text/javascript" src="../vendor/js/jquery-3.4.1.js"></script>
-    <script type="text/javascript" src="../vendor/js/jquery-ui.js"></script>
-    <script type="text/javascript" src="../vendor/js/multiple-select.js"></script>
-    <script type="text/javascript" src="../vendor/js/d3table.js"></script>
-        <script type="text/javascript" src="../vendor/js/spin.js"></script>
-        <!-- <script type="text/javascript" src="./js/oboe-browser.js"></script> -->
-    <script type="text/javascript" src="./js/dialogs.js"></script>
-    <script type="text/javascript" src="./js/history.js"></script>
+    <script type="text/javascript" src="./dist/history.js"></script>
+
+    <link rel="stylesheet" href="./node_modules/cookieconsent/build/cookieconsent.min.css"/>
+    <script>
+        // history.cookieconsent();
+    </script>
+    <link rel="stylesheet" href="./css/history.css"/>
+    <link rel="stylesheet" href="../../vendor/css/d3table.css" />
+    <link rel="stylesheet" href="../../vendor/css/jquery-ui.css" />
+    <link rel="stylesheet" href="../../vendor/css/multiple-select.css" />
 </head>
 
 <body>
 
     <div class="container">
         <div class="page-header">
-            <button id="logout" onclick="window.location = '../xiNET_website/index.php';"> &lt;&lt;HOME </button>
+            <button id="home" onclick="window.location = '../xiNET_website/index.php';"> &lt;&lt;HOME </button>
             <span class="headerLabel">MY DATA</span>
             <span class="headerLabel" id="username"></span>
             <button id="upload" onclick="window.location = '../xiNET_website/upload.php';">Upload data</button>
             <button id="help" onclick="window.open('../xidocs/html/history/index.html', '_blank');">Help</button>
-            <button id="logout" onclick="window.location = '../userGUI/php/logout.php';">Sign Out</button>
+            <button id="logout" onclick="window.location = '../xiNET_website/php/user/logout.php';">Sign Out</button>
             <label class="headerLabel" id="rememberOption" title="Tick to remember filter and ordering choices on this computer using a locally stored cookie">
                 <span>Use cookie</span>
-                <input type="checkbox" onclick="CLMSUI.history.setRemember(event);">
+                <input type="checkbox" onclick="setRemember(event);">
             </label>
             <!-- <button id="delete_account" onclick="CLMSUI.history.deleteAccountDialog();"  title="Delete account and all data" >DELETE ACCOUNT</button> -->
 
@@ -61,8 +68,8 @@
 
     <script>
         //<![CDATA[
-        CLMSUI.history.init();
-        CLMSUI.history.loadSearchList();
+        xiviewhistory.init();
+        xiviewhistory.loadSearchList();
         //]]>
     </script>
 

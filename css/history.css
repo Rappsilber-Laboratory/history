@@ -1,4 +1,4 @@
-@charset 'UTF-8';
+@charset "UTF-8";
 
 body, input, select, textarea {
 	font-size: 13pt;
@@ -20,7 +20,7 @@ th, td {
 }
 
 td:last-child {
-	padding-right: 0px;
+	padding-right: 0;
 }
 
 tbody tr.hiddenSearch {

@@ -1,10 +1,10 @@
 <?php
     session_start();
-    include('../../vendor/php/utils.php');
+    include('../../xiNET_website/php/utils.php');
     //you could comment out the following line and have no login authentication.
     ajaxBootOut();
 
-    include('../../connectionString.php');
+    include('../../xiviewConfig.php');
     //open connection
     try {
         // @ suppresses non-connection throwing an uncatchable error, so we can generate our own error to catch
@@ -14,7 +14,7 @@
             //error_log (print_r ($_SESSION, true));
             //error_log (print_r ($_POST, true));
 
-            $qPart1 = "SELECT * FROM uploads WHERE user_id = $1 AND deleted IS NOT TRUE ORDER BY id DESC;";
+            $qPart1 = "SELECT * FROM upload WHERE user_id = $1 AND deleted IS NOT TRUE ORDER BY id DESC;";
             pg_prepare($dbconn, "my_query", $qPart1);
             $result = pg_execute($dbconn, "my_query", [$_SESSION['user_id']]);
 

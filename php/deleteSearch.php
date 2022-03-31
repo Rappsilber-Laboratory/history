@@ -1,10 +1,10 @@
 <?php
     session_start();
-    include('../../vendor/php/utils.php');
+    include('../../xiNET_website/php/utils.php');
     //you could comment out the following line and have no login authentication.
     ajaxBootOut();
 
-    include('../../connectionString.php');
+    include('../../xiviewConfig.php');
 
     //open connection
     $dbconn = pg_connect($connectionString)
