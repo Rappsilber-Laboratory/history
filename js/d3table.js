@@ -1,3 +1,4 @@
+// author Martin Graham  - see https://github.com/martingraham/d3table
 // /*jslint browser: true, white: true, stupid: true, vars: true*/
 // var has_require = typeof require !== 'undefined';
 // if (has_require) {

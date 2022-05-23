@@ -14,7 +14,7 @@
             //error_log (print_r ($_SESSION, true));
             //error_log (print_r ($_POST, true));
 
-            $qPart1 = "SELECT * FROM upload WHERE user_id = $1 AND deleted IS NOT TRUE ORDER BY id DESC;";
+            $qPart1 = "SELECT id, identification_file_name, provider, audits, samples, bib, spectra_formats, upload_time, upload_error, upload_warnings, random_id FROM upload WHERE user_id = $1 AND deleted IS NOT TRUE ORDER BY id DESC;";
             pg_prepare($dbconn, "my_query", $qPart1);
             $result = pg_execute($dbconn, "my_query", [$_SESSION['user_id']]);
 
@@ -23,13 +23,9 @@
                 $item = $data[$d];
                 if (!empty($item)){
                     // json decoding
-                    $item["peak_list_file_names"] = json_decode($item["peak_list_file_names"]);
-                    $item["analysis_software"] = json_decode($item["analysis_software"]);
                     $item["provider"] = json_decode($item["provider"]);
                     $item["audits"] = json_decode($item["audits"]);
                     $item["samples"] = json_decode($item["samples"]);
-                    $item["analyses"] = json_decode($item["analyses"]);
-                    $item["protocol"] = json_decode($item["protocol"]);
                     $item["bib"] = json_decode($item["bib"]);
                     $item["spectra_formats"] = json_decode($item["spectra_formats"]);
                     $item["upload_warnings"] = json_decode($item["upload_warnings"]);

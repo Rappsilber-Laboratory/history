@@ -13,21 +13,18 @@ const defaultValues = {
     visibility: {
         "Visualise Data": true,
         "Spectra Only": true,
-        "Peak List Files": true,
-        "Analysis Software": false,
-        "Provider": false,
-        "Audits": false,
-        "Samples": false,
-        "Analyses": false,
-        "Protocols": false,
-        "Bib. Refs": false,
-        "Spectra Formats": true,
+        "Provider": true,
+        "Audits": true,
+        "Samples": true,
+        "Bib. Refs": true,
+        "Spectra Formats": false,
         "Upload Error": true,
+        "Upload Warnings": false,
         "Agg Group": true,
         "Delete": true,
     },
     filters: {},
-    searchScope: "mySearches",
+    // searchScope: "mySearches",
     sort: {
         column: null,
         sortDesc: null
@@ -39,24 +36,20 @@ const tempValues = {};	// store user values temporarily, in case they decide to 
 function getInitialValues() {
     const cookieValues = getCookieValue() || {};
     //console.log ("cookieValues", cookieValues);
-    const currentRadio = d3.select("#scopeOptions").selectAll("input[type='radio']")
-        .filter(function () {
-            return d3.select(this).property("checked");
-        });
     // cookieValues overwrites currentRadio which overwrites initialValues
-    return $.extend({}, defaultValues, {searchScope: currentRadio.size() === 1 ? currentRadio.attr("id") : undefined}, cookieValues);
+    return $.extend({}, defaultValues, {/*searchScope: currentRadio.size() === 1 ? currentRadio.attr("id") : undefined*/}, cookieValues);
 }
 
 export function init() {
     // var self = this;
     d3.select("#scopeOptions").selectAll("input[type='radio']")
         .on("change", function () {
-            updateCookie("searchScope", d3.select(this).attr("id"));
+            // updateCookie("searchScope", d3.select(this).attr("id"));
             loadSearchList();
         });
-    const initialValues = getInitialValues();	// get default / cookie values
-    this.tempValues = initialValues;
-    d3.select("#" + initialValues.searchScope).property("checked", true);
+    	// get default / cookie values
+    this.tempValues = getInitialValues();
+    // d3.select("#" + initialValues.searchScope).property("checked", true);
 
     if (!canLocalStorage) {
         d3.select("#rememberOption").style("display", "none");
@@ -75,25 +68,9 @@ export function loadSearchList() {
     const columnSettings = {
         filename: {columnName: "Visualise Data", type: "alpha", headerTooltip: "", visible: true, removable: true},
         validate: {columnName: "Spectra Only", type: "none", headerTooltip: "", visible: true, removable: true},
-        peak_list_file_names: {
-            columnName: "Peak List Files",
-            type: "alpha",
-            headerTooltip: "",
-            visible: true,
-            removable: true
-        },
-        analysis_software: {
-            columnName: "Analysis Software",
-            type: "alpha",
-            headerTooltip: "",
-            visible: true,
-            removable: true
-        },
         provider: {columnName: "Provider", type: "alpha", headerTooltip: "", visible: true, removable: true},
         audits: {columnName: "Audits", type: "alpha", headerTooltip: "", visible: true, removable: true},
         samples: {columnName: "Samples", type: "alpha", headerTooltip: "", visible: true, removable: true},
-        analyses: {columnName: "Analyses", type: "alpha", headerTooltip: "", visible: true, removable: true},
-        protocol: {columnName: "Protocols", type: "alpha", headerTooltip: "", visible: true, removable: true},
         bib: {columnName: "Bib. Refs", type: "alpha", headerTooltip: "", visible: true, removable: true},
         spectra_formats: {
             columnName: "Spectra Formats",
@@ -103,34 +80,18 @@ export function loadSearchList() {
             removable: true
         },
         upload_time: {columnName: "Upload Time", type: "alpha", headerTooltip: "", visible: true, removable: true},
-        contains_crosslinks: {
-            columnName: "Crosslinks",
-            type: "boolean",
-            headerTooltip: "",
-            visible: true,
-            removable: true
-        },
+        // contains_crosslinks: {
+        //     columnName: "Crosslinks",
+        //     type: "boolean",
+        //     headerTooltip: "",
+        //     visible: true,
+        //     removable: true
+        // },
         upload_error: {columnName: "Upload Error", type: "alpha", headerTooltip: "", visible: true, removable: true},
         error_type: {columnName: "Error Type", type: "alpha", headerTooltip: "", visible: true, removable: true},
         upload_warnings: {
             columnName: "Upload Warnings",
             type: "alpha",
-            headerTooltip: "",
-            visible: true,
-            removable: true
-        },
-        origin: {columnName: "Pride URL", type: "alpha", headerTooltip: "", visible: true, removable: true},
-        ident_count: {columnName: "Ident. Count", type: "numeric", headerTooltip: "", visible: true, removable: true},
-        ident_file_size: {
-            columnName: "Ident. File Size",
-            type: "numeric",
-            headerTooltip: "",
-            visible: true,
-            removable: true
-        },
-        zipped_peak_list_file_size: {
-            columnName: "Zipped Peak List Size",
-            type: "numeric",
             headerTooltip: "",
             visible: true,
             removable: true
@@ -145,41 +106,16 @@ export function loadSearchList() {
         hidden: {columnName: "Delete", type: "none", headerTooltip: "", visible: true, removable: true},
     };
 
-
-    // {"peak_list_file_names":"{}","analysis_software":"{}","provider":"{}","audits":"{}","samples":"{}",
-    // "analyses":"{}","protocol":"{}","bib":"{}","spectra_formats":"{}","upload_time":"2018-09-26","default_pdb":null,"contains_crosslinks":null,"upload_error":null,"error_type":null,
-    // "upload_warnings":"{}","origin":"{}","random_id":"74889-02651-89110-99309","deleted":"f","ident_count":null,"ident_file_size":null,"zipped_peak_list_file_size":null}
-
-    // var columnSettings = {
-    //     name: {columnName: "Visualise Search", type: "alpha", headerTooltip: "", visible: true, removable: true},
-    //     fdr: {columnName: "+FDR", type: "none", headerTooltip: "Visualise search with decoys to allow False Discovery Rate calculations", visible: true, removable: true},
-    // 	restart: {columnName: "Restart", type: "none", headerTooltip: "", visible: false, removable: true},
-    //     notes: {columnName: "Notes", type: "alpha", headerTooltip: "", visible: true, removable: true},
-    //     validate: {columnName: "Validate", type: "none", headerTooltip: "", visible: true, removable: true},
-    //     filename: {columnName: "Sequence", type: "alpha", headerTooltip: "", visible: true, removable: true},
-    //     enzyme: {columnName: "Enzyme", type: "alpha", headerTooltip: "", visible: false, removable: true},
-    //     crosslinkers: {columnName: "Cross-Linkers", type: "alpha", headerTooltip: "", visible: false, removable: true},
-    // 	base_new: {columnName: "Base New", type: "none", headerTooltip: "Base a New Search's parameters on this Search", visible: false, removable: true},
-    //     submit_date: {columnName: "Submit Date", type: "alpha", headerTooltip: "", visible: true, removable: true},
-    //     id: {columnName: "ID", type: "alpha", headerTooltip: "", visible: true, removable: true},
-    //     user_name: {columnName: "User", type: "alpha", headerTooltip: "", visible: true, removable: true},
-    //     aggregate: {columnName: "Agg Group", type: "clearCheckboxes", headerTooltip: "Assign numbers to searches to make groups within an aggregated search", visible: true, removable: false},
-    //     //delete: {name: "Delete", type: "deleteHiddenSearchesOption", tooltip: "", visible: true, removable: true},
-    // 	hidden: {columnName: "Delete", type: "boolean", headerTooltip: "", visible: true, removable: true},
-    // };
-
     // Set visibilities of columns according to cookies or default values
     d3.entries(columnSettings).forEach(function (columnEntry) {
         columnEntry.value.visible = initialValues.visibility[columnEntry.value.columnName];
     }, this);
-
 
     const pluck = function (data, prop) {
         return data.map(function (d) {
             return d[prop];
         });
     };
-
 
     if (d3.select(".container #clmsErrorBox").empty()) {
         const statusBox = d3.select(".container")
@@ -194,12 +130,11 @@ export function loadSearchList() {
         .text("Loading Search Metadata from Xi Database.");
     const spinner = new Spinner({scale: 1, left: 12}).spin(d3.select("#clmsErrorBox").node());
 
-
     const t1 = performance.now();
 
     $.ajax({
         type: "POST",
-        url: "./php/xiUI_uploads.php",
+        url: "./php/uploads.php",
         contentType: "application/x-www-form-urlencoded",
         dataType: "json",
         success: function (response, responseType, xmlhttp) {
@@ -259,12 +194,6 @@ export function loadSearchList() {
                         filename: function (d) {
                             return tooltipHelper(d, "filename");
                         },
-                        peak_list_file_names: function (d) {
-                            return jsonTooltipHelper(d, "peak_list_file_names");
-                        },
-                        analysis_software: function (d) {
-                            return jsonTooltipHelper(d, "analysis_software");
-                        },
                         provider: function (d) {
                             return jsonTooltipHelper(d, "provider");
                         },
@@ -273,12 +202,6 @@ export function loadSearchList() {
                         },
                         samples: function (d) {
                             return jsonTooltipHelper(d, "samples");
-                        },
-                        analyses: function (d) {
-                            return jsonTooltipHelper(d, "analyses");
-                        },
-                        protocol: function (d) {
-                            return jsonTooltipHelper(d, "protocol");
                         },
                         bib: function (d) {
                             return jsonTooltipHelper(d, "bib");
@@ -298,18 +221,6 @@ export function loadSearchList() {
                         },
                         upload_warnings: function (d) {
                             return jsonTooltipHelper(d, "upload_warnings");
-                        },
-                        origin: function (d) {
-                            return d.origin;
-                        },
-                        ident_count: function (d) {
-                            return d.ident_count;
-                        },
-                        ident_file_size: function (d) {
-                            return d.ident_file_size;
-                        },
-                        zipped_peak_list_file_size: function (d) {
-                            return d.zipped_peak_list_file_size;
                         }
                     };
 
@@ -338,33 +249,14 @@ export function loadSearchList() {
                         filename: function (d) {
                             const completed = true;//d.status === "completed";
                             const name = d.filename;//d.name.length < 200 ? d.name : (d.name.substring (0, 200) + "…");
-                            const nameHtml = completed ? makeResultsLink(d.id + "-" + d.random_id, "", name)
-                                : "<span class='unviewableSearch'>" + name + "</span>";
                             // var error = !completed && d.status.substring(0,4) === "XiDB";
-                            return nameHtml;// + (error ? "<span class='xierror'>" : "") + " ["+d.status.substring(0,16)+"]" + (error ? "</span>" : "")
+                            return completed ? makeResultsLink(d.id + "-" + d.random_id, "", name)
+                                : "<span class='unviewableSearch'>" + name + "</span>";// + (error ? "<span class='xierror'>" : "") + " ["+d.status.substring(0,16)+"]" + (error ? "</span>" : "")
                             /*+ (d.status.length <= 16 ? "" : "<div style='display:none'>"+d.status+"</div>")*/
 
                         },
                         validate: function (d) {
                             return makeValidationLink(d.id + "-" + d.random_id, "", "View Spectra");
-                        },
-                        peak_list_file_names: function (d) {
-                            return d.peak_list_file_names;
-                        },
-                        analysis_software: function (d) {
-                            //return d.analysis_software;
-                            let text = "";
-                            if (d.analysis_software) {
-                                for (let i = 0; i < d.analysis_software.length; i++) {
-                                    if (i > 0) {
-                                        text = text + "; ";
-                                    }
-                                    const software = d.analysis_software[i];
-                                    text = text + (software.name ? software.name : software.id);
-                                    text = text + " " + software.version;
-                                }
-                            }
-                            return text;
                         },
                         provider: function (d) {
                             if (d.provider) {
@@ -407,12 +299,6 @@ export function loadSearchList() {
                             }
                             return text;
                         },
-                        analyses: function (d) {
-                            return JSON.stringify(d.analyses);
-                        },
-                        protocol: function (d) {
-                            return JSON.stringify(d.protocol);
-                        },
                         bib: function (d) {
                             return JSON.stringify(d.bib);
                         },
@@ -439,9 +325,9 @@ export function loadSearchList() {
                         upload_time: function (d) {
                             return d.upload_time;
                         },
-                        contains_crosslinks: function (d) {
-                            return isTruthy(d.contains_crosslinks);
-                        },
+                        // contains_crosslinks: function (d) {
+                        //     return isTruthy(d.contains_crosslinks);
+                        // },
                         upload_error: function (d) {
                             return d.upload_error;
                         },
@@ -460,19 +346,6 @@ export function loadSearchList() {
                             }
                             return text;
                         },
-                        origin: function (d) {
-                            return d.origin;
-                        },
-                        ident_count: function (d) {
-                            return d.ident_count;
-                        },
-                        ident_file_size: function (d) {
-                            return d.ident_file_size;
-                        },
-                        zipped_peak_list_file_size: function (d) {
-                            return d.zipped_peak_list_file_size;
-                        },
-
                         aggregate: function (d) {
                             const completed = true;//d.status === "completed";
                             return completed ? "<input type='number' pattern='\\d*' class='aggregateInput' id='agg_" + d.id + "-" + d.random_id + "' maxlength='1' min='1' max='9'" + (d.aggregate ? " value='" + d.aggregate + "'" : "") + ">" : "";
@@ -481,7 +354,6 @@ export function loadSearchList() {
                             return "<button class='deleteButton unpadButton'>Delete</button>";
                         }
                     };
-
 
                     const propertyNames = ["cellStyle", "dataToHTMLModifier", "tooltip"];
                     [cellStyles, modifiers, tooltips].forEach(function (obj, i) {
@@ -548,37 +420,6 @@ export function loadSearchList() {
                             });
                     }
 
-                    // cookie store if allowed
-                    function storeColumnHiding(value, checked) {
-                        const visibilities = getCookieValue("visibility");
-                        if (visibilities) {
-                            visibilities[value] = checked;
-                            updateCookie("visibility", visibilities);
-                        }
-                    }
-
-                    function storeOrdering(sortColumn, sortDesc) {
-                        const sort = getCookieValue("sort");
-                        if (sort) {
-                            sort.column = sortColumn;
-                            sort.sortDesc = sortDesc;
-                            updateCookie("sort", sort);
-                        }
-                    }
-
-                    function storeFiltering(filterVals) {
-                        const filters = getCookieValue("filters");
-                        if (filters) {
-                            const dfilters = filterVals;
-                            const fobj = {};
-                            dfilters.forEach(function (df, i) {
-                                if (df !== "none" && df.value) {
-                                    fobj[i] = df.value;
-                                }
-                            });
-                            updateCookie("filters", fobj);
-                        }
-                    }
 
 
                     // Add a multiple select widget for column visibility
@@ -883,6 +724,37 @@ export function loadSearchList() {
     });
 }
 
+// cookie store if allowed
+function storeColumnHiding(value, checked) {
+    const visibilities = getCookieValue("visibility");
+    if (visibilities) {
+        visibilities[value] = checked;
+        updateCookie("visibility", visibilities);
+    }
+}
+
+function storeOrdering(sortColumn, sortDesc) {
+    const sort = getCookieValue("sort");
+    if (sort) {
+        sort.column = sortColumn;
+        sort.sortDesc = sortDesc;
+        updateCookie("sort", sort);
+    }
+}
+
+function storeFiltering(filterVals) {
+    const filters = getCookieValue("filters");
+    if (filters) {
+        const dfilters = filterVals;
+        const fobj = {};
+        dfilters.forEach(function (df, i) {
+            if (df !== "none" && df.value) {
+                fobj[i] = df.value;
+            }
+        });
+        updateCookie("filters", fobj);
+    }
+}
 
 function aggregate(tableData, fdrCapable) {
     const values = tableData
