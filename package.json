@@ -53,8 +53,7 @@
     "spin.js": "~4.1.0",
     "backbone": "~1.4.0",
     "d3": "~3.5.5",
-    "webpack-jquery-ui": "~2.0.1",
-    "multiple-select": "~1.5.2"
+    "webpack-jquery-ui": "~2.0.1"
   },
   "keywords": [
     "xiVIEW",

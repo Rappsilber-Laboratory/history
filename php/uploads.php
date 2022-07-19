@@ -23,17 +23,17 @@
                 $item = $data[$d];
                 if (!empty($item)){
                     // json decoding
-                    $item["provider"] = json_decode($item["provider"]);
-                    $item["audits"] = json_decode($item["audits"]);
-                    $item["samples"] = json_decode($item["samples"]);
-                    $item["bib"] = json_decode($item["bib"]);
-                    $item["spectra_formats"] = json_decode($item["spectra_formats"]);
-                    $item["upload_warnings"] = json_decode($item["upload_warnings"]);
+//                    $item["provider"] = json_decode($item["provider"]);
+//                    $item["audits"] = json_decode($item["audits"]);
+//                    $item["samples"] = json_decode($item["samples"]);
+//                    $item["bib"] = json_decode($item["bib"]);
+//                    $item["spectra_formats"] = json_decode($item["spectra_formats"]);
+//                    $item["upload_warnings"] = json_decode($item["upload_warnings"]);
 
-                    // foreach($item as $var => $value) {
-                    //     //echo "$var is $value\n";
-                    //     $item[$var] = json_decode($value);
-                    // }
+                     foreach($item as $var => $value) {
+                         //echo "$var is $value\n";
+                         $item[$var] = json_decode($value);
+                     }
 
                     //error_log("WTF?".json_encode($item, 4), 0);
                     // if ($item) {

@@ -4,27 +4,26 @@ import {Spinner} from "spin.js";
 import {jqdialogs} from "./dialogs";
 import {d3Table} from "./d3table";
 
-
 function makeResultsUrl(sid, params) {
     return "../xi3/network.php?upload=" + sid + params;
 }
 
 const defaultValues = {
-    visibility: {
-        "Visualise Data": true,
-        "Spectra Only": true,
-        "Provider": true,
-        "Audits": true,
-        "Samples": true,
-        "Bib. Refs": true,
-        "Spectra Formats": false,
-        "Upload Error": true,
-        "Upload Warnings": false,
-        "Agg Group": true,
-        "Delete": true,
-    },
+    // visibility: {
+    //     "Visualise Data": true,
+    /*upload time*/
+    //     "Spectra Only": true,
+    //     "Provider": true,
+    //     "Audits": true,
+    //     "Samples": true,
+    //     "Bib. Refs": true,
+    //     "Spectra Formats": true,
+    //     "Upload Error": true,
+    //     "Upload Warnings": true,
+    //     "Agg Group": true,
+    //     "Delete": true,
+    // },
     filters: {},
-    // searchScope: "mySearches",
     sort: {
         column: null,
         sortDesc: null
@@ -47,10 +46,9 @@ export function init() {
             // updateCookie("searchScope", d3.select(this).attr("id"));
             loadSearchList();
         });
-    	// get default / cookie values
+    // get default / cookie values
     this.tempValues = getInitialValues();
     // d3.select("#" + initialValues.searchScope).property("checked", true);
-
     if (!canLocalStorage) {
         d3.select("#rememberOption").style("display", "none");
     }
@@ -108,7 +106,7 @@ export function loadSearchList() {
 
     // Set visibilities of columns according to cookies or default values
     d3.entries(columnSettings).forEach(function (columnEntry) {
-        columnEntry.value.visible = initialValues.visibility[columnEntry.value.columnName];
+        columnEntry.value.visible = true; //initialValues.visibility[columnEntry.value.columnName];
     }, this);
 
     const pluck = function (data, prop) {
@@ -409,6 +407,7 @@ export function loadSearchList() {
                     /* Everything up to this point helps generates the dynamic table */
 
                     // button to clear aggregation checkboxes
+                    // eslint-disable-next-line no-inner-declarations
                     function addClearAggInputsButton(buttonContainer, d3rowFunc, data) {
                         buttonContainer
                             .append("button")
@@ -423,6 +422,7 @@ export function loadSearchList() {
 
 
                     // Add a multiple select widget for column visibility
+                    // eslint-disable-next-line no-inner-declarations
                     function addColumnSelector(containerSelector, d3table, dispatch) {
                         const newtd = containerSelector;
                         newtd.append("span").text("Show Columns");
@@ -447,19 +447,20 @@ export function loadSearchList() {
                             .property("selected", function (d) {
                                 return d.value.visible;
                             });
-                        // $(newtd.select("select").node()).multipleSelect({
-                        //     selectAll: false,
-                        //     onClick: function (view) {
-                        //         // hide/show column chosen by user
-                        //         const key = view.value;
-                        //         datum[key].visible = view.checked;
-                        //         d3table.showColumn(d3table.getColumnIndex(key) + 1, view.checked);
-                        //         dispatch.columnHiding(view.label, view.checked);
-                        //     }
-                        // });
+                        $(newtd.select("select").node()).multipleSelect({
+                            selectAll: false,
+                            onClick: function (view) {
+                                // hide/show column chosen by user
+                                const key = view.value;
+                                datum[key].visible = view.checked;
+                                d3table.showColumn(d3table.getColumnIndex(key) + 1, view.checked);
+                                dispatch.columnHiding(view.label, view.checked);
+                            }
+                        });
                     }
 
 
+                    // eslint-disable-next-line no-inner-declarations
                     function applyHeaderStyling(headers) {
                         let title = headers.select("svg").select("title");
                         if (title.empty()) {
@@ -494,6 +495,7 @@ export function loadSearchList() {
 
 
                     // hidden row state can change when restore/delete pressed or when restart pressed
+                    // eslint-disable-next-line no-inner-declarations
                     function updateHiddenRowStates(selectedRows) {
                         // reset button text and row appearance
                         selectedRows.selectAll(".deleteButton").text(function (d) {
