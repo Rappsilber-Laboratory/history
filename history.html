@@ -35,7 +35,7 @@
     <link rel="stylesheet" href="./css/history.css"/>
     <link rel="stylesheet" href="../../vendor/css/d3table.css" />
     <link rel="stylesheet" href="../../vendor/css/jquery-ui.css" />
-    <link rel="stylesheet" href="../../vendor/css/multiple-select.css" />
+<!--    <link rel="stylesheet" href="../../vendor/css/multiple-select.css" />-->
 </head>
 
 <body>
@@ -43,15 +43,15 @@
     <div class="container">
         <div class="page-header">
             <button id="home" onclick="window.location = '../xiNET_website/index.php';"> &lt;&lt;HOME </button>
-            <span class="headerLabel">MY DATA</span>
             <span class="headerLabel" id="username"></span>
+            <span class="headerLabel">'S DATA</span>
             <button id="upload" onclick="window.location = '../xiNET_website/upload.php';">Upload data</button>
             <button id="help" onclick="window.open('../xidocs/html/history/index.html', '_blank');">Help</button>
             <button id="logout" onclick="window.location = '../xiNET_website/php/user/logout.php';">Sign Out</button>
-            <label class="headerLabel" id="rememberOption" title="Tick to remember filter and ordering choices on this computer using a locally stored cookie">
-                <span>Use cookie</span>
-                <input type="checkbox" onclick="setRemember(event);">
-            </label>
+<!--            <label class="headerLabel" id="rememberOption" title="Tick to remember filter and ordering choices on this computer using a locally stored cookie">-->
+<!--                <span>Use cookie</span>-->
+<!--                <input type="checkbox" onclick="setRemember(event);">-->
+<!--            </label>-->
             <!-- <button id="delete_account" onclick="CLMSUI.history.deleteAccountDialog();"  title="Delete account and all data" >DELETE ACCOUNT</button> -->
 
             <div style="float:right">
@@ -71,7 +71,6 @@
 
     <script>
         //<![CDATA[
-        xiviewhistory.init();
         xiviewhistory.loadSearchList();
         //]]>
     </script>

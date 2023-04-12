@@ -54,7 +54,6 @@ tbody tr:hover button {
 
 .headerLabel {
 	text-transform: uppercase;
-    margin-right:10px;
     font-size:0.9em;
 }
 
@@ -214,7 +213,7 @@ TABLE.d3table thead th.dottedBorder span.d3table-headerSpan {
 
 span.d3table-pageInfo {
 	margin-right: 0.5em;
-	border-right: 1px solid grey;
+	/*border-right: 1px solid grey;*/
 	padding-right: 0.5em;
 }
 
