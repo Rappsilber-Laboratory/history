@@ -13,7 +13,7 @@ try {
 
     /** @noinspection PhpConditionAlreadyCheckedInspection */
     if ($dbconn) {
-        $qPart1 = "SELECT id, identification_file_name, TO_CHAR (upload_time, 'YYYY/MM/DD___HH24:MI' ) AS upload_time, upload_error, upload_warnings, random_id FROM upload WHERE user_id = $1 AND deleted IS NOT TRUE ORDER BY id DESC;";
+        $qPart1 = "SELECT id, identification_file_name, TO_CHAR (upload_time, 'YYYY-MM-DD  HH24:MI' ) AS upload_time, upload_error, upload_warnings, random_id FROM upload WHERE user_id = $1 AND deleted IS NOT TRUE ORDER BY id DESC;";
         pg_prepare($dbconn, "my_query", $qPart1);
         $result = pg_execute($dbconn, "my_query", [$_SESSION['user_id']]);
         $data = pg_fetch_all($result);

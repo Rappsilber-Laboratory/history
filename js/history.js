@@ -1,3 +1,9 @@
+import "../../xiNET_website/css/reset.css";
+import "../../xiNET_website/css/common.css";
+import "../css/history.css";
+import "../css/d3table.css";
+// import "../css/jquery-ui.css";
+
 import * as $ from "jquery";
 import d3 from "d3";
 import {Spinner} from "spin.js";
