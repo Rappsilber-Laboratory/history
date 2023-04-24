@@ -29,8 +29,6 @@ export function loadSearchList() {
     d3.selectAll(".d3tableContainer").remove();
     d3.selectAll("button").classed("btn btn-1 btn-1a", true);
 
-    const self = this;
-
     const columnSettings = {
         identification_file_name: {columnName: "Visualise Network", type: "alpha", headerTooltip: "", visible: true},
         validate: {columnName: "Spectra Only", type: "none", headerTooltip: "", visible: true},
@@ -101,10 +99,10 @@ export function loadSearchList() {
                     }
 
                     d3.select("#aggSearch").on("click", function () {
-                        self.aggregate(response.data, false);
+                        aggregate(response.data, false);
                     });
                     d3.select("#aggFDRSearch").on("click", function () {
-                        self.aggregate(response.data, true);
+                        aggregate(response.data, true);
                     });
 
                     d3.select("#username").text(response.user);
