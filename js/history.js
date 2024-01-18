@@ -1,5 +1,5 @@
-import "../../xiNET_website/css/reset.css";
-import "../../xiNET_website/css/common.css";
+import "../css/reset.css";
+import "../css/common.css";
 import "../css/history.css";
 import "../css/d3table.css";
 // import "../css/jquery-ui.css";
@@ -11,7 +11,7 @@ import {jqdialogs} from "./dialogs";
 import {d3Table} from "./d3table";
 
 function makeResultsUrl(sid, params) {
-    return "../xi3/network.php?upload=" + sid + params;
+    return "../network.php?upload=" + sid + params;
 }
 
 const defaultValues = {
@@ -116,7 +116,7 @@ export function loadSearchList() {
                     };
 
                     const makeValidationUrl = function (sid, params) {
-                        return "../xi3/validate.php?upload=" + sid + params;
+                        return "../spectra.php?upload=" + sid + params;
                     };
 
                     const isTruthy = function (val) {
